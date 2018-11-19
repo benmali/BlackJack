@@ -5,19 +5,20 @@ import itertools
 
 class CardPlayer:
 
-    def __init__(self, name, hand, second_hand, money, bet, second_bet,):
+    def __init__(self, name, hand, second_hand, money, bet, second_bet):
         self.name = name
-        self.hand = hand
+        self.hand = []
         self.money = money
         self.bet = bet
         self.second_bet = second_bet
-        self.second_hand = second_hand
+        self.second_hand = []
         self.second_hand_value = 0
         self.hand_value = 0
         self.hit_counter = 0
         self.hit_counter2 = 0
         self.ace_counter = 0
         self.ace_counter2 = 0
+        self.split = 0
 
 
 
@@ -32,56 +33,17 @@ class CardPlayer:
         print (players_list)
         return players_list
 
-    def get_split(self):
-        if self.second_hand_value> 21:
-            print ("You are burned baby!")
-            return self.second_hand, self.second_hand_value
-            print ("GOT 21")
-            return self.second_hand, self.second_hand_value
-        else:
-            deck = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-                    "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-                    "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-                    "Picks": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
-                    }
 
-            drawn_card = list(random.choice(deck.items()))
-            drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
-            deck.pop(drawn_card[0], drawn_card[1])  # Erasing the drawn card from the dictionary
-            self.second_hand.append(drawn_card)
-
-            self.hit_counter2 += 1 #calculates how many times have the player hit to get the cards value
-            if self.second_hand[self.hit_counter2 - 1][1] == "Jack":
-                self.second_hand_value += 10
-            elif self.second_hand[self.hit_counter2 - 1][1] == "Queen":
-                self.second_hand_value += 10
-            elif self.second_hand[self.hit_counter2 - 1][1] == "King":
-                self.second_hand_value += 10
-            elif self.second_hand[self.hit_counter2 - 1][1] == "Ace":
-                self.second_hand_value += 11
-                self.ace_counter2 += 1
-            else:
-                self.second_hand_value += self.second_hand[self.hit_counter2 - 1][1]
-
-            if ("Ace" in self.second_hand) and (self.second_hand_value > 21) and (self.ace_counter2 > 0):
-                self.ace_counter2 -= 1
-                self.second_hand_value -= 10
-
-            return self.second_hand, self.second_hand_value
 
     def get_card(self):
-        if self.hand_value > 21:
-            print ("You are burned ")
-            return self.hand, self.hand_value
-        elif self.second_hand_value == 21:
-            print ("GOT 21")
-            return self.hand, self.hand_value
-        else:
+
+        """Need to add break when player hits 21 or burns"""
+        if self.second_hand == []:
             deck = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-                    "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-                    "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-                    "Picks": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
-                    }
+                        "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                        "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                        "Picks": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
+                        }
 
             drawn_card = list(random.choice(deck.items()))
             drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
@@ -106,7 +68,84 @@ class CardPlayer:
                 self.ace_counter -= 1
                 self.hand_value -= 10
 
-            return self.hand, self.hand_value
+            if self.second_hand == 1: #Draws Automatically when user splits
+                '''Need to reset hit counter?'''
+                deck = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                            "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                            "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                            "Picks": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
+                            }
+
+                drawn_card = list(random.choice(deck.items()))
+                drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
+                deck.pop(drawn_card[0], drawn_card[1])  # Erasing the drawn card from the dictionary
+                self.hand.append(drawn_card)
+                self.hit_counter += 1
+
+                if self.second_hand[self.hit_counter2 - 1][1] == "Jack":
+                    self.hand_value += 10
+                elif self.hand[self.hit_counter - 1][1] == "Queen":
+                    self.hand_value += 10
+                elif self.hand[self.hit_counter - 1][1] == "King":
+                    self.hand_value += 10
+                elif self.hand[self.hit_counter - 1][1] == "Ace":
+                    self.hand_value += 11
+                    self.ace_counter += 1
+                else:
+                    self.hand_value += self.hand[self.hit_counter - 1][1]
+
+                if ("Ace" in self.hand) and (self.hand_value > 21) and (self.ace_counter > 0):
+                    self.ace_counter -= 1
+                    self.hand_value -= 10
+                """Gets the 2nd Card to user's 2nd hand"""
+                drawn_card = list(random.choice(deck.items()))
+                drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
+                deck.pop(drawn_card[0], drawn_card[1])  # Erasing the drawn card from the dictionary
+                self.second_hand.append(drawn_card)
+                self.hit_counter2 += 1  # calculates how many times have the player hit to get the cards vale
+
+                if self.second_hand[self.hit_counter2 - 1][1] == "Jack":
+                    self.second_hand_value += 10
+                elif self.second_hand[self.hit_counter2 - 1][1] == "Queen":
+                    self.second_hand_value += 10
+                elif self.second_hand[self.hit_counter2 - 1][1] == "King":
+                    self.second_hand_value += 10
+                elif self.second_hand[self.hit_counter2 - 1][1] == "Ace":
+                    self.second_hand_value += 11
+                    self.ace_counter2 += 1
+                else:
+                    self.second_hand_value += self.second_hand[self.hit_counter2 - 1][1]
+
+                if ("Ace" in self.second_hand) and (self.second_hand_value > 21) and (self.ace_counter2 > 0):
+                    self.ace_counter2 -= 1
+                    self.second_hand_value -= 10
+
+                """Hitting to player's 2nd hand"""
+                if self.second_hand == 1:
+                    drawn_card = list(random.choice(deck.items()))
+                    drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
+                    deck.pop(drawn_card[0], drawn_card[1])  # Erasing the drawn card from the dictionary
+                    self.second_hand.append(drawn_card)
+                    self.hit_counter2 += 1  # calculates how many times have the player hit to get the cards vale
+
+                    if self.second_hand[self.hit_counter2 - 1][1] == "Jack":
+                        self.second_hand_value += 10
+                    elif self.second_hand[self.hit_counter2 - 1][1] == "Queen":
+                        self.second_hand_value += 10
+                    elif self.second_hand[self.hit_counter2 - 1][1] == "King":
+                        self.second_hand_value += 10
+                    elif self.second_hand[self.hit_counter2 - 1][1] == "Ace":
+                        self.second_hand_value += 11
+                        self.ace_counter2 += 1
+                    else:
+                        self.second_hand_value += self.second_hand[self.hit_counter2 - 1][1]
+
+                    if ("Ace" in self.second_hand) and (self.second_hand_value > 21) and (self.ace_counter2 > 0):
+                        self.ace_counter2 -= 1
+                        self.second_hand_value -= 10
+
+
+        return self.hand, self.hand_value, self.second_hand, self.second_hand_value
 
     def make_bet(self):
 
@@ -130,19 +169,23 @@ class CardPlayer:
     def player_turn(self):
 
         while True:
+            if self.hand_value >= 21:
+                break
+            if self.second_hand_value >= 21:
+                break
             print "{} your Cards are: {}".format(self.name, self.hand)
             p_decision = raw_input("Enter Stand, Hit, Split or Double")
+            if self.split == 1:
+                print "This is your 2nd hand"
 
             if p_decision == "Stand":
-                break
-            elif p_decision == "Hit":
-
-                if self.hand_value > 21:
-                    print ("Passed 21!")
-                    break
+                if self.second_hand == 2:
+                    self.split += 1
+                    self.player_turn()
                 else:
+                    break
+            elif p_decision == "Hit":
                     self.get_card()
-                    continue
 
             elif p_decision == "Split":
 
@@ -152,7 +195,7 @@ class CardPlayer:
                     self.hand = self.hand[0]  #First card stays in hand #1
                     self.second_hand = self.hand[1]  #Second card goes to hand #2
                     self.get_card()
-                    self.get_split()
+
                     self.player_turn()
 
                 else:
@@ -170,71 +213,94 @@ class CardPlayer:
             self.get_card()
 
 
-class SplitPlayer(CardPlayer):
-    pass
+
+
+
+
+def start_game():
+
+
+    PlayerOne.make_bet()
+    print PlayerOne.money
+
+    PlayerTwo.make_bet()
+    print PlayerTwo.money
+
+    """Starting the game with dealing each player 2 cards!"""
+    i = 0
+    while i < 2:
+        PlayerOne.get_card()
+        PlayerTwo.get_card()
+        Dealer.get_card()
+        i += 1
+    print("Player one's hand is: ", PlayerOne.hand)
+    print ("Dealer's face-up card is:", Dealer.hand[0][::])
+    PlayerOne.player_turn()
+    print("Player two's hand is: ", PlayerTwo.hand)
+    print ("Dealer's face-up card is:", Dealer.hand[0][::])
+    PlayerTwo.player_turn()
+    """Bets are over, Dealer drawing!!!"""
+    print ("Player One hand value is {}".format(PlayerOne.hand_value))
+    print ("Player Two hand value is {}".format(PlayerTwo.hand_value))
+    while Dealer.hand_value < 17:  ##Conversion needed for hand_value #Dealer stops hitting at 17
+        Dealer.get_card()
+        if Dealer.hand_value >= 17:
+            break
+    print "Dealer cards: ", Dealer.hand
+    print ("Dealer's Cards value is : {}".format(Dealer.hand_value))
+    """Concluding the game"""
+
+    if Dealer.hand_value <= 21:
+        if Dealer.hand_value > PlayerOne.hand_value:
+            Dealer.money += PlayerOne.bet
+            PlayerOne.bet = 0
+            print("Dealer beat Player One!")
+        elif Dealer.hand_value == PlayerOne.hand_value:
+            print("Player One tied with Dealer!")
+        else:
+            PlayerOne.bet *= 2
+            PlayerOne.money += PlayerOne.bet
+            PlayerOne.bet = 0
+            print ("Dealer lost to Player One!")
+
+    if Dealer.hand_value <= 21:
+        if Dealer.hand_value > PlayerTwo.hand_value:
+            Dealer.money += PlayerTwo.bet
+            PlayerTwo.bet = 0
+            print("Dealer beat Player Two!")
+        elif Dealer.hand_value == PlayerTwo.hand_value:
+            print("Player Two tied with Dealer!")
+        else:
+
+            PlayerTwo.bet *= 2
+            PlayerTwo.money += PlayerTwo.bet
+            PlayerTwo.bet = 0
+            print ("Dealer lost to Player Two!")
+    else:
+        print "Dealer got burned!!"
+
+    while True:
+        y = raw_input("Play again? Press Yes or No")
+        if y == "Yes":
+            PlayerOne.hand = []
+            PlayerOne.second_hand = []
+            PlayerOne.hand_value = 0
+            PlayerOne.second_hand_value = 0
+            PlayerTwo.hand = []
+            PlayerTwo.second_hand = []
+            PlayerTwo.hand_value = 0
+            PlayerTwo.second_hand_value = 0
+            Dealer.hand = []
+            Dealer.hand_value = 0
+
+
+        else:
+            exit()
+
 Dealer = CardPlayer("Dealer", [], [], 50000, [], [])
 PlayerOne = CardPlayer("Ben", [], [], 5000, [], [])
 PlayerTwo = CardPlayer("Roni", [], [], 5000, [], [])
-
-PlayerOne.make_bet()
-print PlayerOne.money
-
-PlayerTwo.make_bet()
-print PlayerTwo.money
-
-"""Starting the game with dealing each player 2 cards!"""
-i = 0
-while i < 2:
-    PlayerOne.get_card()
-    PlayerTwo.get_card()
-    Dealer.get_card()
-    i += 1
-print("Player one's hand is: ",PlayerOne.hand)
-print ("Dealer's face-up card is:",Dealer.hand[0][::])
-PlayerOne.player_turn()
-print("Player two's hand is: ",PlayerTwo.hand)
-print ("Dealer's face-up card is:",Dealer.hand[0][::])
-PlayerTwo.player_turn()
-"""Bets are over, Dealer drawing!!!"""
-print ("Player One hand value is {}".format(PlayerOne.hand_value))
-print ("Player Two hand value is {}".format(PlayerTwo.hand_value))
-while Dealer.hand_value < 17:##Conversion needed for hand_value #Dealer stops hitting at 17
-    Dealer.get_card()
-    if Dealer.hand_value >= 17:
-        break
-print "Dealer cards: ", Dealer.hand
-print ("Dealer's Cards value is : {}".format(Dealer.hand_value))
-"""Concluding the game"""
-
-if Dealer.hand_value <= 21:
-    if Dealer.hand_value > PlayerOne.hand_value:
-        Dealer.money += PlayerOne.bet
-        PlayerOne.bet = 0
-        print("Dealer beat Player One!")
-    elif Dealer.hand_value == PlayerOne.hand_value:
-        print("Player One tied with Dealer!")
-    else:
-        PlayerOne.bet *= 2
-        PlayerOne.money += PlayerOne.bet
-        PlayerOne.bet = 0
-        print ("Dealer lost to Player One!")
-
-if Dealer.hand_value <= 21:
-    if Dealer.hand_value > PlayerTwo.hand_value:
-        Dealer.money += PlayerTwo.bet
-        PlayerTwo.bet = 0
-        print("Dealer beat Player Two!")
-    elif Dealer.hand_value == PlayerTwo.hand_value:
-        print("Player Two tied with Dealer!")
-    else:
-
-        PlayerTwo.bet *= 2
-        PlayerTwo.money += PlayerTwo.bet
-        PlayerTwo.bet = 0
-        print ("Dealer lost to Player Two!")
-else:
-    print "Dealer got burned!!"
-
+start_game()
 
 
 
