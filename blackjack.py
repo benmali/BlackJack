@@ -351,18 +351,19 @@ class CardPlayer:
                 c.place(relx=0.5, rely=0.5, anchor=CENTER)
                 start_pos[0] += 40
                 start_pos[1] += 20
-            time.sleep(2)
             if not self.stand_flag:
                 c.create_text(250, 20, fill="black", font="Times 9 bold",
                           text="{} your cards value is {}\nDealer upside card is {} ".format(self.name, self.hand_value,
                                                                                              Dealer.hand[1][:]))
+                time.sleep(2)
+                return
             if self.stand_flag:
                 c.create_text(250, 20, fill="black", font="Times 9 bold",
                               text="{} your cards value is {}\nDealer upside card is {} ".format(self.name,
                                                                                                  self.second_hand_value,
                                                                                                  Dealer.hand[1][:]))
-            time.sleep(2)
-            return
+                time.sleep(2)
+                return
 
 
     def player_turn(self):
