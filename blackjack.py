@@ -4,13 +4,14 @@ import threading
 import time
 from PIL import ImageTk, Image
 import os
+
 class CardPlayer:
 
-    def __init__(self, name, hand, second_hand , money , bet, second_bet,win ):
+    def __init__(self, name, money):
         self.name = name
         self.hand = []
         self.money = money
-        self.bet = bet
+        self.bet = 0
         self.second_bet = 0
         self.second_hand = []
         self.second_hand_value = 0
@@ -22,17 +23,14 @@ class CardPlayer:
         self.split = 0
         self.stand_flag = 0
         self.black_jack = 0
-        self.elapsed = 0
         self.deck  = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
             "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
             "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
             "Spades": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
             }
 
-
     def __repr__(self):
         return "CardPlayer('{}','{}')".format(self.name, self.hand)
-
 
     def reset(self):
         self.hand = []
@@ -50,9 +48,11 @@ class CardPlayer:
         play = True
 
 
+
+
     def conclude(self):
         c = Canvas(win, bg="white", height=400, width=500)
-        if self.hand_value > 21: #Regular Burn
+        if self.hand_value > 21:#Regular Burn
             print("{} is burned, lost this hand".format(self.name))
             c.create_text(200, 20, fill="black", font="Times 14 bold",
                                     text="{} is burned!".format(self.name))
@@ -144,40 +144,36 @@ class CardPlayer:
 
     def make_bet(self):
 
-        while True:
             try:
-                while self.elapsed <=7:
-                    label = Label(win, text="{}, Enter a number to bet!".format(self.name))
-                    label.pack()
-                    input = Entry(win, textvariable=self.bet)
-                    input.pack()
-                    time.sleep(2)
-                    self.bet = int(input.get())
-                    input.destroy()
-                    label.destroy()
+                if self.bet > 0:
                     time.sleep(0.1)
                     win.update()
-                    if self.bet > 0:
-                        time.sleep(0.1)
-                        win.update()
-                        break
-                    self.bet = int(raw_input("Enter a number to bet"))
-                    print (" your bet is: ", self.bet)
+
+                label = Label(win, text="{}, Enter a number to bet!".format(self.name))
+                label.pack()
+                input = Entry(win, textvariable=self.bet)
+                input.pack()
+                time.sleep(5)
+                self.bet = int(input.get())
+                input.destroy()
+                label.destroy()
+                time.sleep(0.1)
+                win.update()
+
+                print (" your bet is: ", self.bet)
 
                 # Bet entered successfully
 
                 if self.bet <= self.money:
                     self.money -= self.bet
-                    break
+
                 else:
                     print ("Not enough money to bet!!!")
-                    return False
 
-            except ValueError:
+            except ValueError: # If bet was not entered on time, a default bet of 1 is given
                 input.destroy()
                 label.destroy()
-                print (" Enter a valid number")
-
+                self.bet = 1
 
     def conv_value(self, value):
         if value == "Jack" or value == "Queen" or value == "King":
@@ -222,22 +218,23 @@ class CardPlayer:
             print ("Can't split unequal cards!")
 
     def double(self):
-        self.money -= self.bet
-        self.bet *= 2
-        if self.stand_flag == 0 and self.split == 0 :
-            self.deal_hand1()
-            self.stand_flag = 1
-            return
-        if self.stand_flag == 1 and self.split == 1:
-            self.deal_hand2()
-            self.stand_flag = 2
-            return
-        if self.stand_flag == 0 and self.split == 1:
-            self.deal_hand1()
-            self.stand_flag = 1
-            return
-        else:
-            pass
+        if len(self.hand) or len(self.second_hand) == 2:
+            self.money -= self.bet
+            self.bet *= 2
+            if self.stand_flag == 0 and self.split == 0 :
+                self.deal_hand1()
+                self.stand_flag = 1
+                return
+            if self.stand_flag == 1 and self.split == 1:
+                self.deal_hand2()
+                self.stand_flag = 2
+                return
+            if self.stand_flag == 0 and self.split == 1:
+                self.deal_hand1()
+                self.stand_flag = 1
+                return
+            else:
+                pass
 
 
     def deal_hand1(self):
@@ -376,17 +373,7 @@ class CardPlayer:
     def player_turn(self):
         while True: # Player gets 7 seconds to play his hand, or he stands automatically
             try:
-                if self.stand_flag == 0 and self.split == 1:  # Showing both hands after splitting the cards
-                    print("")
-                    self.show_cards()
-                    win.update()
-                if self.stand_flag == 1 and self.split == 0:  # Normal end of turn condition
-                    self.show_cards()  # only for showing cards after double! canvas is deleted after showing!!
-                    break
-                if self.stand_flag == 0 and self.split == 0:  # Taking care of hand1
-                    print("")
-                    self.show_cards()
-                    print "{} your Cards are: {}, card value: {}".format(self.name, self.hand, self.hand_value)
+
 
                 if self.hand_value > 21 and self.split == 1:
                     """In case 1st hand is burned but didnt play 2nd"""
@@ -396,15 +383,15 @@ class CardPlayer:
                     if self.conv_value(self.hand[0][0]) == 10 and self.conv_value(self.hand[0][1]) == 11:#BLACKJACK
                         print ("{} your hand is {}, you got BlackJack!".format(self.name, self.hand))
                         self.black_jack = 1
-                        break
+                        self.stand_flag =1
                     if self.conv_value(self.hand[0][0]) == 11 and self.conv_value(self.hand[0][1]) == 10:# BLACKJACK
                         self.show_cards()
                         print ("{} your hand is {}, you got BlackJack!".format(self.name, self.hand))
                         self.black_jack = 1
-                        break
+                        self.stand_flag =1
                     self.show_cards()
                     print ("{} your hand is {}, you got 21!".format(self.name, self.hand))
-                    break
+                    self.stand_flag = 1
 
                 if self.second_hand_value > 21:
                     self.show_cards()
@@ -415,7 +402,7 @@ class CardPlayer:
                     self.show_cards()
                     print ("")
                     print ("{} your hand is {}, you got burned!".format(self.name,self.hand))
-                    break
+                    self.stand_flag = 1
 
                 if self.second_hand_value == 21:
                     if self.conv_value(self.second_hand[0][0]) == 10 and self.conv_value(self.second_hand[0][1]) == 11:#BLACKJACK
@@ -435,19 +422,30 @@ class CardPlayer:
                 if self.second_hand_value == 21:
                     self.show_cards()
                     print ("")
-                    print ("{} your hand is {}, you got21!".format(self.name, self.second_hand))
-                    self.stand_flag = 2
+                    print ("{} your hand is {}, you got 21!".format(self.name, self.second_hand))
                     break
-
+                if self.stand_flag == 0 and self.split == 1:  # Showing both hands after splitting the cards
+                    print("")
+                    self.show_cards()
+                    continue
+                if self.stand_flag == 1 and self.split == 0:  # Normal end of turn condition
+                    self.show_cards()  # only for showing cards after double! canvas is deleted after showing!!
+                    break
+                if self.stand_flag == 0 and self.split == 0:  # Taking care of hand1
+                    print("")
+                    self.show_cards()
+                    print "{} your Cards are: {}, card value: {}".format(self.name, self.hand, self.hand_value)
+                    continue
                 if self.stand_flag == 1 and self.split == 1:  # Condition for playing hand 2 turn, condition for split
                     print "{} your  2 Cards are: {}, card value: {}".format(self.name, self.second_hand, self.second_hand_value)
                     self.show_cards()
+                    continue
                 if self.stand_flag == 2:
                     self.show_cards()
                     break
 
             except IOError:
-                pass
+                print("IO error")
 
 def play_again():
     global play
@@ -455,12 +453,23 @@ def play_again():
     PlayerOne.reset()
     PlayerTwo.reset()
     Dealer.reset()
+def create_bet_canvas():
+    b = Canvas(win, bg="white", height=80, width=150)
+    b.place(x=60, y=20)
+    b.create_text(70, 20, fill="black", font="Times 8 bold",
+                  text="{} your bank is {} ".format(PlayerOne.name, PlayerOne.money))
+    b.create_text(70, 50, fill="black", font="Times 8 bold",
+                  text="{} your bank is {} ".format(PlayerTwo.name, PlayerTwo.money))
 
 def main_game():
+
     while True:
+
         players = [PlayerOne, PlayerTwo]
+        create_bet_canvas()
         for player in players:
             player.make_bet()
+            create_bet_canvas()
             print str(player.money) + "\n"
 
         for i in range(2):
@@ -483,6 +492,12 @@ def main_game():
         for player in players:
             print ("{} hand value is {}".format(player.name, player.hand_value))
             player.conclude()
+        b = Canvas(win, bg="white", height=80, width=150)
+        b.place(x=60, y=20)
+        b.create_text(70, 20, fill="black", font="Times 8 bold",
+                      text="{} your bank is {} ".format(PlayerOne.name, PlayerOne.money))
+        b.create_text(70, 50, fill="black", font="Times 8 bold",
+                      text="{} your bank is {} ".format(PlayerTwo.name, PlayerTwo.money))
         c = Canvas(win, bg="white", height=450, width=200)
         c.place(x=270, y=250)
         button1 = Button(c, text="Play Again", command=play_again,
@@ -492,7 +507,7 @@ def main_game():
         button1.pack()
         global play
         play = False
-        time.sleep(5)
+        time.sleep(10)
         if play:
             c.delete(button1)
             win.update()
@@ -506,9 +521,9 @@ def main_game():
 win = Tk()
 win.geometry("1000x600")
 win.title('Black Jack')
-Dealer = CardPlayer("Dealer", [], [], 50000, [], [],win)
-PlayerOne = CardPlayer("Ben", [], [], 5000, [], [],win)
-PlayerTwo = CardPlayer("Roni", [], [], 5000, [], [],win)
+Dealer = CardPlayer("Dealer", 50000)
+PlayerOne = CardPlayer("Ben", 5000)
+PlayerTwo = CardPlayer("Roni", 5000)
 players = [PlayerOne, PlayerTwo]
 global play
 play = True
@@ -516,10 +531,11 @@ play = True
 
 
 thread = threading.Thread(target=main_game)
+
 #make loop terminate when the user exits the window
 thread.daemon = True
 thread.start()
-event = threading.Event()
+
 #defining GUI and buttons outside of class:
 frame = Frame(win)
 frame.pack()
