@@ -35,6 +35,7 @@ class CardPlayer:
 
     def reset(self):
         self.hand = []
+        self.bet = 0
         self.second_bet = 0
         self.second_hand = []
         self.second_hand_value = 0
@@ -218,23 +219,24 @@ class CardPlayer:
             print ("Can't split unequal cards!")
 
     def double(self):
-        if len(self.hand) == 2 or len(self.second_hand) == 2:
-            self.money -= self.bet
-            self.bet *= 2
-            if not self.stand_flag and self.split == 0:
-                self.deal_hand1()
-                self.stand_flag = True
-                return
-            if self.stand_flag and self.split == 1:
-                self.deal_hand2()
-                self.stand2 = True
-                return
-            if  not self.stand_flag and self.split == 1:
-                self.deal_hand1()
-                self.stand_flag = True
-                return
-            else:
-                return
+        if  not self.stand2 or not self.stand_flag:
+            if len(self.hand) == 2 or len(self.second_hand) == 2:
+                self.money -= self.bet
+                self.bet *= 2
+                if not self.stand_flag and self.split == 0:
+                    self.deal_hand1()
+                    self.stand_flag = True
+                    return
+                if self.stand_flag and self.split == 1:
+                    self.deal_hand2()
+                    self.stand2 = True
+                    return
+                if not self.stand_flag and self.split == 1:
+                    self.deal_hand1()
+                    self.stand_flag = True
+                    return
+                else:
+                    return
 
 
     def deal_hand1(self):
@@ -299,44 +301,34 @@ class CardPlayer:
             time.sleep(2)
             return
 
+
+        for i in range(len(self.hand)):
+            value = self.hand[i][1]
+            symbol = (self.hand[i][0]).lower()
+            image = Image.open(str(os.getcwd()) + "/cards/{}/{}/{}.png".format(value, symbol, value))
+            image = image.resize((90, 120), Image.ANTIALIAS)  # The (150, 100) is (w, h)
+            img = ImageTk.PhotoImage(image)
+            imglst.append(img)
+        for img in imglst:
+            image = Image.open(
+                str(os.getcwd()) + "/cards/{}/{}/{}.png".format(Dealer.hand[1][1],
+                                                                Dealer.hand[1][0],
+                                                                Dealer.hand[1][1]))
+            image = image.resize((90, 120), Image.ANTIALIAS)  # The (150, 100) is (w, h)
+            im = ImageTk.PhotoImage(image)
+            c.create_image((260, 105), image=im)  # coordinates are position of image
+            c.create_image(tuple(start_pos), image=img)  ##### add location instead of anchor
+            c.place(relx=0.5, rely=0.5, anchor=CENTER)
+            start_pos[0] += 40
+            start_pos[1] += 20
         if self.split == 0:
-            for i in range(len(self.hand)):
-                value = self.hand[i][1]
-                symbol = (self.hand[i][0]).lower()
-                image = Image.open(str(os.getcwd()) + "/cards/{}/{}/{}.png".format(value, symbol, value))
-                image = image.resize((90, 120), Image.ANTIALIAS)  # The (150, 100) is (w, h)
-                img = ImageTk.PhotoImage(image)
-                imglst.append(img)
-            for img in imglst:
-                image = Image.open(
-                    str(os.getcwd()) + "/cards/{}/{}/{}.png".format(Dealer.hand[1][1],
-                                                                                      Dealer.hand[1][0],
-                                                                                      Dealer.hand[1][1]))
-                image = image.resize((90, 120), Image.ANTIALIAS)  # The (150, 100) is (w, h)
-                im = ImageTk.PhotoImage(image)
-                c.create_image((260, 105), image=im)  # coordinates are position of image
-                c.create_image(tuple(start_pos), image=img)  ##### add location instead of anchor
-                c.place(relx=0.5, rely=0.5, anchor=CENTER)
-                start_pos[0] += 40
-                start_pos[1] += 20
             c.create_text(250, 20, fill="black", font="Times 9 bold",
-                          text="{} your cards value is {}\nDealer upside card is {} ".format(self.name,self.hand_value,Dealer.hand[1][:]))
+                          text="{} your cards value is {}\nDealer upside card is {} ".format(self.name, self.hand_value,
+                                                                                             Dealer.hand[1][:]))
             time.sleep(2)
             return
+
         if self.split == 1:
-            start_pos = [100, 250]
-            for i in range(len(self.hand)):
-                value = self.hand[i][1]
-                symbol = (self.hand[i][0]).lower()
-                image = Image.open(str(os.getcwd()) + "/cards/{}/{}/{}.png".format(value, symbol, value))
-                image = image.resize((90, 120), Image.ANTIALIAS)  # The (150, 100) is (w, h)
-                img = ImageTk.PhotoImage(image)
-                imglst.append(img)
-            for img in imglst:
-                c.create_image(tuple(start_pos), image=img)  ##### add location instead of anchor
-                c.place(relx=0.5, rely=0.5, anchor=CENTER)
-                start_pos[0] += 40
-                start_pos[1] += 20
             start_pos = [300, 250]
             imglst2 = []
             for i in range(len(self.second_hand)):
@@ -359,11 +351,12 @@ class CardPlayer:
                 c.place(relx=0.5, rely=0.5, anchor=CENTER)
                 start_pos[0] += 40
                 start_pos[1] += 20
-            if self.stand_flag == 0:
+            time.sleep(2)
+            if not self.stand_flag:
                 c.create_text(250, 20, fill="black", font="Times 9 bold",
                           text="{} your cards value is {}\nDealer upside card is {} ".format(self.name, self.hand_value,
                                                                                              Dealer.hand[1][:]))
-            if self.stand_flag == 1:
+            if self.stand_flag:
                 c.create_text(250, 20, fill="black", font="Times 9 bold",
                               text="{} your cards value is {}\nDealer upside card is {} ".format(self.name,
                                                                                                  self.second_hand_value,
@@ -392,7 +385,6 @@ class CardPlayer:
                         print ("{} your hand is {}, you got BlackJack!".format(self.name, self.hand))
                         self.black_jack = 1
                     self.stand_flag = True
-
 
                 if len(self.second_hand) > 0:
 
