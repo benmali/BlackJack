@@ -5,8 +5,8 @@ import time
 from PIL import ImageTk, Image
 import os
 
-class CardPlayer:
 
+class CardPlayer:
     def __init__(self, name, money):
         self.name = name
         self.hand = []
@@ -24,11 +24,10 @@ class CardPlayer:
         self.stand_flag = False
         self.stand2 = True
         self.black_jack = 0
-        self.deck  = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-            "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-            "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
-            "Spades": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
-            }
+        self.deck = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                     "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                     "Clubs": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
+                     "Spades": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]}
 
     def __repr__(self):
         return "CardPlayer('{}','{}')".format(self.name, self.hand)
@@ -52,7 +51,7 @@ class CardPlayer:
 
     def conclude(self):
         c = Canvas(win, bg="white", height=400, width=500)
-        if self.hand_value > 21:#Regular Burn
+        if self.hand_value > 21:  # Regular Burn
             print("{} is burned, lost this hand".format(self.name))
             c.create_text(200, 20, fill="black", font="Times 14 bold",
                                     text="{} is burned!".format(self.name))
@@ -60,7 +59,7 @@ class CardPlayer:
             time.sleep(2.5)
             play = False
             return
-        if len(self.second_hand) != 0: # Split situation
+        if len(self.second_hand) != 0:  # Split situation
             if self.hand_value <= 21 and Dealer.hand_value > self.hand_value and (Dealer.hand_value <= 21):
                 print("Dealer Won against 1st hand")
                 c.create_text(200, 20, fill="black", font="Times 14 bold",
@@ -103,7 +102,7 @@ class CardPlayer:
             time.sleep(2.5)
             play = False
             return
-        if Dealer.hand_value > 21 and self.hand_value <=21:
+        if Dealer.hand_value > 21 and self.hand_value <= 21:
             self.win()
             print ("Dealer burned, {} won the hand".format(self.name))
             c.create_text(200, 20, fill="black", font="Times 14 bold",
@@ -301,8 +300,7 @@ class CardPlayer:
             time.sleep(2)
             return
 
-
-        for i in range(len(self.hand)):
+        for i in range(len(self.hand)):  # displaying cards for players, regardless of split
             value = self.hand[i][1]
             symbol = (self.hand[i][0]).lower()
             image = Image.open(str(os.getcwd()) + "/cards/{}/{}/{}.png".format(value, symbol, value))
@@ -328,7 +326,7 @@ class CardPlayer:
             time.sleep(2)
             return
 
-        if self.split == 1:
+        if self.split == 1:  # if split happens, display hand 2
             start_pos = [300, 250]
             imglst2 = []
             for i in range(len(self.second_hand)):
@@ -365,9 +363,8 @@ class CardPlayer:
                 time.sleep(2)
                 return
 
-
     def player_turn(self):
-        while True: # Player gets 7 seconds to play his hand, or he stands automatically
+        while True:  # Player gets 7 seconds to play his hand, or he stands automatically
             try:
                 self.show_cards()
                 if self.hand_value > 21 and self.split == 0:  # common condition for burning
@@ -389,14 +386,14 @@ class CardPlayer:
 
                 if len(self.second_hand) > 0:
 
-                    if self.second_hand_value > 21 and self.stand_flag: #stand on first hand, burn on 2nd
+                    if self.second_hand_value > 21 and self.stand_flag:  # stand on first hand, burn on 2nd
                         self.show_cards()
                         print ("")
                         print ("{} your hand is {}, you got burned!".format(self.name, self.second_hand))
                         self.stand2 = True
 
                     if self.second_hand_value == 21:
-                        if self.conv_value(self.second_hand[0][0]) == 10 and self.conv_value(self.second_hand[0][1]) == 11:#BLACKJACK
+                        if self.conv_value(self.second_hand[0][0]) == 10 and self.conv_value(self.second_hand[0][1]) == 11:  # BLACKJACK
                             print ("{} your hand is {}, you got BlackJack!".format(self.name, self.second_hand))
                             self.black_jack = 1
                         self.stand2 = True
@@ -408,12 +405,15 @@ class CardPlayer:
             except IOError:
                 print("IO error")
 
+
 def play_again():
     global play
     play = True
     PlayerOne.reset()
     PlayerTwo.reset()
     Dealer.reset()
+
+
 def create_bet_canvas():
     b = Canvas(win, bg="white", height=80, width=150)
     b.place(x=60, y=20)
@@ -421,6 +421,7 @@ def create_bet_canvas():
                   text="{} your bank is {} ".format(PlayerOne.name, PlayerOne.money))
     b.create_text(70, 50, fill="black", font="Times 8 bold",
                   text="{} your bank is {} ".format(PlayerTwo.name, PlayerTwo.money))
+
 
 def main_game():
 
@@ -490,14 +491,14 @@ global play
 play = True
 thread = threading.Thread(target=main_game)
 
- #make loop terminate when the user exits the window
+# make loop terminate when the user exits the window
 thread.daemon = True
 thread.start()
 
-#defining GUI and buttons outside of class:
+# defining GUI and buttons outside of class:
 frame = Frame(win)
 frame.pack()
-#player 1 buttons
+# player 1 buttons
 hitButton = Button(win, text="Hit - {}".format(PlayerOne.name), fg="green", bg="white", command=PlayerOne.deal_hand1)
 standButton = Button(win, text="Stand", fg="red", bg="white", command=PlayerOne.stand)
 splitButton = Button(win, text="Split", fg="blue", bg="white", command=PlayerOne.split_cards)
@@ -507,7 +508,7 @@ standButton.place(x=365, y=550)
 splitButton.place(x=403, y=550)
 doubleButton.place(x=435, y=550)
 
-#player 2 buttons
+# player 2 buttons
 hitButton = Button(win, text="Hit - {}".format(PlayerTwo.name), fg="green", bg="white", command=PlayerTwo.deal_hand1)
 standButton = Button(win, text="Stand", fg="red", bg="white", command=PlayerTwo.stand)
 splitButton = Button(win, text="Split", fg="blue", bg="white", command=PlayerTwo.split_cards)
