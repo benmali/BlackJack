@@ -21,7 +21,8 @@ class CardPlayer:
         self.ace_counter = 0
         self.ace_counter2 = 0
         self.split = 0
-        self.stand_flag = 0
+        self.stand_flag = False
+        self.stand2 = True
         self.black_jack = 0
         self.deck  = {"Hearts": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
             "Diamonds": [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"],
@@ -43,12 +44,10 @@ class CardPlayer:
         self.ace_counter = 0
         self.ace_counter2 = 0
         self.split = 0
-        self.stand_flag = 0
+        self.stand_flag = False
+        self.stand2 = True
         self.black_jack = 0
         play = True
-
-
-
 
     def conclude(self):
         c = Canvas(win, bg="white", height=400, width=500)
@@ -173,7 +172,7 @@ class CardPlayer:
             except ValueError: # If bet was not entered on time, a default bet of 1 is given
                 input.destroy()
                 label.destroy()
-                self.bet = 1
+
 
     def conv_value(self, value):
         if value == "Jack" or value == "Queen" or value == "King":
@@ -184,21 +183,21 @@ class CardPlayer:
             return value
 
     def hit(self):
-        if self.stand_flag == 0:
+        if not self.stand_flag:
             self.deal_hand1()
-        if self.stand_flag == 1:
+        if self.stand_flag and self.split == 1:
             self.deal_hand2()
         return self.hand, self.hand_value, self.second_hand, self.second_hand_value
 
     def stand(self):
         if len(self.second_hand) == 0:
-            self.stand_flag = 2
+            self.stand_flag = True
             return
-        elif self.stand_flag == 1 and self.split == 1:
-            self.stand_flag = 2
+        elif self.stand_flag == True and self.split == 1:
+            self.stand2 = True
             return
         elif len(self.second_hand) == 2 and self.split == 1:
-            self.stand_flag = 1
+            self.stand_flag = True
 
 
     def split_cards(self):
@@ -214,31 +213,32 @@ class CardPlayer:
             self.deal_hand1()
             self.deal_hand2()
             self.split += 1
+            self.stand2 = False
         else:
             print ("Can't split unequal cards!")
 
     def double(self):
-        if len(self.hand) or len(self.second_hand) == 2:
+        if len(self.hand) == 2 or len(self.second_hand) == 2:
             self.money -= self.bet
             self.bet *= 2
-            if self.stand_flag == 0 and self.split == 0 :
+            if not self.stand_flag and self.split == 0:
                 self.deal_hand1()
-                self.stand_flag = 1
+                self.stand_flag = True
                 return
-            if self.stand_flag == 1 and self.split == 1:
+            if self.stand_flag and self.split == 1:
                 self.deal_hand2()
-                self.stand_flag = 2
+                self.stand2 = True
                 return
-            if self.stand_flag == 0 and self.split == 1:
+            if  not self.stand_flag and self.split == 1:
                 self.deal_hand1()
-                self.stand_flag = 1
+                self.stand_flag = True
                 return
             else:
-                pass
+                return
 
 
     def deal_hand1(self):
-        if self.stand_flag == 0 : #regular scenario
+        if not self.stand_flag : #regular scenario
             drawn_card = list(random.choice(self.deck.items()))
             drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
             self.hand.append(drawn_card)
@@ -249,7 +249,8 @@ class CardPlayer:
             if (self.hand_value > 21) and (self.ace_counter > 0):
                 self.ace_counter -= 1
                 self.hand_value -= 10
-        if self.stand_flag == 1 and self.split == 1:
+
+        if self.stand_flag and self.split == 1:
             drawn_card = list(random.choice(self.deck.items()))
             drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
             self.second_hand.append(drawn_card)
@@ -270,10 +271,11 @@ class CardPlayer:
         self.second_hand_value += self.conv_value(self.second_hand[self.hit_counter2 - 1][1])
         if self.second_hand[self.hit_counter2 - 1][1] == "Ace":
             self.ace_counter2 += 1
-
         if (self.second_hand_value > 21) and (self.ace_counter2 > 0):
             self.ace_counter2 -= 1
             self.second_hand_value -= 10
+
+
     def show_cards(self):
         imglst = []
         start_pos = [100, 250]
@@ -373,76 +375,42 @@ class CardPlayer:
     def player_turn(self):
         while True: # Player gets 7 seconds to play his hand, or he stands automatically
             try:
-
-
-                if self.hand_value > 21 and self.split == 1:
-                    """In case 1st hand is burned but didnt play 2nd"""
+                self.show_cards()
+                if self.hand_value > 21 and self.split == 0:  # common condition for burning
                     self.show_cards()
-                    self.stand_flag = 1
+                    print ("")
+                    print ("{} your hand is {}, you got burned!".format(self.name, self.hand))
+                    break
+
+                if self.hand_value > 21 and self.split == 1:  # In case 1st hand is burned but didn't play 2nd
+                    self.show_cards()
+                    self.stand_flag = True
+
                 if self.hand_value == 21:
-                    if self.conv_value(self.hand[0][0]) == 10 and self.conv_value(self.hand[0][1]) == 11:#BLACKJACK
+                    if self.conv_value(self.hand[0][0]) == 10 and self.conv_value(
+                            self.hand[0][1]) == 11:  # BLACKJACK
                         print ("{} your hand is {}, you got BlackJack!".format(self.name, self.hand))
                         self.black_jack = 1
-                        self.stand_flag =1
-                    if self.conv_value(self.hand[0][0]) == 11 and self.conv_value(self.hand[0][1]) == 10:# BLACKJACK
+                    self.stand_flag = True
+
+
+                if len(self.second_hand) > 0:
+
+                    if self.second_hand_value > 21 and self.stand_flag: #stand on first hand, burn on 2nd
                         self.show_cards()
-                        print ("{} your hand is {}, you got BlackJack!".format(self.name, self.hand))
-                        self.black_jack = 1
-                        self.stand_flag =1
-                    self.show_cards()
-                    print ("{} your hand is {}, you got 21!".format(self.name, self.hand))
-                    self.stand_flag = 1
+                        print ("")
+                        print ("{} your hand is {}, you got burned!".format(self.name, self.second_hand))
+                        self.stand2 = True
 
-                if self.second_hand_value > 21:
-                    self.show_cards()
-                    print ("")
-                    print ("{} your hand is {}, you got burned!".format(self.name, self.second_hand))
-                    break
-                if self.hand_value > 21 and self.split == 0:# common condition for burning
-                    self.show_cards()
-                    print ("")
-                    print ("{} your hand is {}, you got burned!".format(self.name,self.hand))
-                    self.stand_flag = 1
+                    if self.second_hand_value == 21:
+                        if self.conv_value(self.second_hand[0][0]) == 10 and self.conv_value(self.second_hand[0][1]) == 11:#BLACKJACK
+                            print ("{} your hand is {}, you got BlackJack!".format(self.name, self.second_hand))
+                            self.black_jack = 1
+                        self.stand2 = True
 
-                if self.second_hand_value == 21:
-                    if self.conv_value(self.second_hand[0][0]) == 10 and self.conv_value(self.second_hand[0][1]) == 11:#BLACKJACK
-                        print ("{} your hand is {}, you got BlackJack!".format(self.name, self.second_hand))
-                        self.black_jack = 1
-                        break
-                    if self.conv_value(self.second_hand[0][0]) == 11 and self.conv_value(self.second_hand[0][1]) == 10:# BLACKJACK
+                if self.stand_flag and self.stand2:
                         self.show_cards()
-                        print ("{} your second_hand is {}, you got BlackJack!".format(self.name, self.second_hand))
-                        self.black_jack = 1
                         break
-                    self.show_cards()
-                    print ("{} your hand is {}, you got 21!".format(self.name, self.hand))
-                    break
-
-
-                if self.second_hand_value == 21:
-                    self.show_cards()
-                    print ("")
-                    print ("{} your hand is {}, you got 21!".format(self.name, self.second_hand))
-                    break
-                if self.stand_flag == 0 and self.split == 1:  # Showing both hands after splitting the cards
-                    print("")
-                    self.show_cards()
-                    continue
-                if self.stand_flag == 1 and self.split == 0:  # Normal end of turn condition
-                    self.show_cards()  # only for showing cards after double! canvas is deleted after showing!!
-                    break
-                if self.stand_flag == 0 and self.split == 0:  # Taking care of hand1
-                    print("")
-                    self.show_cards()
-                    print "{} your Cards are: {}, card value: {}".format(self.name, self.hand, self.hand_value)
-                    continue
-                if self.stand_flag == 1 and self.split == 1:  # Condition for playing hand 2 turn, condition for split
-                    print "{} your  2 Cards are: {}, card value: {}".format(self.name, self.second_hand, self.second_hand_value)
-                    self.show_cards()
-                    continue
-                if self.stand_flag == 2:
-                    self.show_cards()
-                    break
 
             except IOError:
                 print("IO error")
@@ -466,11 +434,13 @@ def main_game():
     while True:
 
         players = [PlayerOne, PlayerTwo]
+
         create_bet_canvas()
         for player in players:
             player.make_bet()
             create_bet_canvas()
             print str(player.money) + "\n"
+        players = [player for player in players if player.bet > 0]  # player without bet is excluded
 
         for i in range(2):
             for player in players:
@@ -516,8 +486,6 @@ def main_game():
             break
 
 
-
-
 win = Tk()
 win.geometry("1000x600")
 win.title('Black Jack')
@@ -527,12 +495,9 @@ PlayerTwo = CardPlayer("Roni", 5000)
 players = [PlayerOne, PlayerTwo]
 global play
 play = True
-
-
-
 thread = threading.Thread(target=main_game)
 
-#make loop terminate when the user exits the window
+ #make loop terminate when the user exits the window
 thread.daemon = True
 thread.start()
 
