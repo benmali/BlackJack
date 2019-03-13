@@ -51,6 +51,54 @@ class CardPlayer:
 
     def conclude(self):
         c = Canvas(win, bg="white", height=400, width=500)
+        if len(self.second_hand) != 0:  # Split situation
+
+            if self.second_hand_value > 21:  # 2nd hand Burn
+                print("{} is burned, lost 2nd hand".format(self.name))
+                c.create_text(200, 20, fill="black", font="Times 14 bold",
+                              text="{} is burned!".format(self.name))
+                c.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+            if (self.second_hand_value <= 21) and (Dealer.hand_value == self.second_hand_value) and (Dealer.hand_value <= 21):  # Tie
+                print("Dealer is tied against {} 2nd hand".format(self.name))
+                self.tie()
+                c.create_text(200, 20, fill="black", font="Times 14 bold",
+                              text="Dealer is tied against {} 2nd hand".format(self.name))
+                c.place(relx=0.5, rely=0.5, anchor=CENTER)
+                time.sleep(2.5)
+
+            if self.second_hand_value <= 21 and Dealer.hand_value > self.second_hand_value and (Dealer.hand_value <= 21):  # Lost 2nd hand
+                print("Dealer Won against 2nd hand")
+                c.create_text(200, 50, fill="black", font="Times 14 bold",
+                              text="Dealer Won against {}'s 2nd hand".format(self.name))
+                c.place(relx=0.5, rely=0.5, anchor=CENTER)
+                time.sleep(2.5)
+
+            if Dealer.hand_value < self.second_hand_value <= 21:  # Won 2nd hand
+                if self.black_jack == 1:
+                    self.winbj()
+                else:
+                    self.win()
+                print("Dealer Lost against 2nd hand")
+                c.create_text(200, 50, fill="black", font="Times 14 bold",
+                              text="Dealer lost against {}'s 2nd hand".format(self.name))
+                c.place(relx=0.5, rely=0.5, anchor=CENTER)
+                time.sleep(2.5)
+
+            if self.second_hand_value <= 21 < Dealer.hand_value:  # Dealer is burned
+                if self.black_jack == 1:
+                    self.winbj()
+                else:
+                    self.win()
+                print ("Dealer burned, {} won 2nd hand".format(self.name))
+                c.create_text(200, 20, fill="black", font="Times 14 bold",
+                              text="Dealer burned, {} won the hand".format(self.name))
+                c.place(relx=0.5, rely=0.5, anchor=CENTER)
+                time.sleep(2.5)
+                play = False
+
+        # one hand situations
+
         if self.hand_value > 21:  # Regular Burn
             print("{} is burned, lost this hand".format(self.name))
             c.create_text(200, 20, fill="black", font="Times 14 bold",
@@ -59,71 +107,46 @@ class CardPlayer:
             time.sleep(2.5)
             play = False
             return
-        if len(self.second_hand) != 0:  # Split situation
-            if self.hand_value <= 21 and Dealer.hand_value > self.hand_value and (Dealer.hand_value <= 21):
-                print("Dealer Won against 1st hand")
-                c.create_text(200, 20, fill="black", font="Times 14 bold",
-                              text="Dealer Won against {}'s 1st hand".format(self.name))
-                c.place(relx=0.5, rely=0.5, anchor=CENTER)
-            if self.second_hand_value <= 21 and Dealer.hand_value > self.second_hand_value and (Dealer.hand_value <= 21):
-                self.win()
-                print("Dealer Won against 2nd hand")
-                c.create_text(200, 50, fill="black", font="Times 14 bold",
-                              text="Dealer Won against {}'s 2nd hand".format(self.name))
-                c.place(relx=0.5, rely=0.5, anchor=CENTER)
-                time.sleep(2.5)
-            if self.hand_value <= 21 and Dealer.hand_value < self.hand_value:
-                self.win()
-                print("Dealer Lost against 1st hand")
-                c.create_text(200, 20, fill="black", font="Times 14 bold",
-                              text="Dealer won against {}'s 1st hand".format(self.name))
-                c.place(relx=0.5, rely=0.5, anchor=CENTER)
-            if self.second_hand_value <= 21 and Dealer.hand_value < self.second_hand_value:
-                self.win()
-                print("Dealer Lost against 2nd hand")
-                c.create_text(200, 50, fill="black", font="Times 14 bold",
-                              text="Dealer lost against {}'s 2nd hand".format(self.name))
-                c.place(relx=0.5, rely=0.5, anchor=CENTER)
-                time.sleep(2.5)
-        if self.hand_value <= 21 and Dealer.hand_value > self.hand_value and (Dealer.hand_value <= 21):
-            print("Dealer Won against {}".format(self.name))
-            c.create_text(200, 20, fill="black", font="Times 14 bold",
-                          text="Dealer Won against {}".format(self.name))
-            c.place(relx=0.5, rely=0.5, anchor=CENTER)
-            time.sleep(2.5)
-            play = False
-            return
-        if self.hand_value <= 21 and Dealer.hand_value < self.hand_value and (Dealer.hand_value <= 21):
-            self.win()
-            print("{} Won against the dealer".format(self.name))
-            c.create_text(200, 20, fill="black", font="Times 14 bold",
-                          text="{} Won against the Dealer".format(self.name))
-            c.place(relx=0.5, rely=0.5, anchor=CENTER)
-            time.sleep(2.5)
-            play = False
-            return
-        if Dealer.hand_value > 21 and self.hand_value <= 21:
-            self.win()
-            print ("Dealer burned, {} won the hand".format(self.name))
-            c.create_text(200, 20, fill="black", font="Times 14 bold",
-                          text="Dealer burned, {} won the hand".format(self.name))
-            c.place(relx=0.5, rely=0.5, anchor=CENTER)
-            time.sleep(2.5)
-            play = False
-            return
-        if (self.hand_value <= 21) and (Dealer.hand_value > self.hand_value) and (Dealer.hand_value <= 21):
-            print("Dealer Won against {}".format(self.name))
-            c.create_text(200, 20, fill="black", font="Times 14 bold",
-                          text="Dealer Won against {}".format(self.name))
-            c.place(relx=0.5, rely=0.5, anchor=CENTER)
-            time.sleep(2.5)
-            play = False
-            return
-        if (self.hand_value <= 21) and (Dealer.hand_value == self.hand_value) and (Dealer.hand_value <= 21):
+
+        if (self.hand_value <= 21) and (Dealer.hand_value == self.hand_value) and (Dealer.hand_value <= 21):  # Tie
             print("Dealer is tied against {}".format(self.name))
             self.tie()
             c.create_text(200, 20, fill="black", font="Times 14 bold",
                           text="Dealer is tied against {}".format(self.name))
+            c.place(relx=0.5, rely=0.5, anchor=CENTER)
+            time.sleep(2.5)
+            play = False
+            return
+
+        if self.hand_value <= 21 and Dealer.hand_value > self.hand_value and (Dealer.hand_value <= 21):  # Lost hand
+            print("Dealer Won against 1st hand")
+            c.create_text(200, 20, fill="black", font="Times 14 bold",
+                          text="Dealer Won against {}'s 1st hand".format(self.name))
+            c.place(relx=0.5, rely=0.5, anchor=CENTER)
+            time.sleep(2.5)
+            play = False
+            return
+
+        if Dealer.hand_value < self.hand_value <= 21:  # Won hand
+            if self.black_jack == 1:
+                self.winbj()
+                time.sleep(2.5)
+                play = False
+                return
+            else:
+                self.win()
+                time.sleep(2.5)
+                play = False
+                return
+
+        if self.hand_value <= 21 < Dealer.hand_value:  # Dealer is burned
+            if self.black_jack == 1:
+                self.winbj()
+            else:
+                self.win()
+            print ("Dealer burned, {} won the hand".format(self.name))
+            c.create_text(200, 20, fill="black", font="Times 14 bold",
+                          text="Dealer burned, {} won the hand".format(self.name))
             c.place(relx=0.5, rely=0.5, anchor=CENTER)
             time.sleep(2.5)
             play = False
@@ -140,9 +163,7 @@ class CardPlayer:
     def tie(self):
         self.money += self.bet
 
-
     def make_bet(self):
-
             try:
                 if self.bet > 0:
                     time.sleep(0.1)
@@ -169,10 +190,9 @@ class CardPlayer:
                 else:
                     print ("Not enough money to bet!!!")
 
-            except ValueError: # If bet was not entered on time, a default bet of 1 is given
+            except ValueError:  # If bet was not entered on time, bet stays 0, and the user will not play this turn
                 input.destroy()
                 label.destroy()
-
 
     def conv_value(self, value):
         if value == "Jack" or value == "Queen" or value == "King":
@@ -199,9 +219,10 @@ class CardPlayer:
         elif len(self.second_hand) == 2 and self.split == 1:
             self.stand_flag = True
 
-
     def split_cards(self):
-        if self.conv_value(self.hand[0][1]) == self.conv_value(self.hand[1][1]):
+        if self.split == 1 or len(self.hand) > 2:  # blocks the option to split more than  once
+            return
+        if self.conv_value(self.hand[0][1]) == self.conv_value(self.hand[1][1]):  # 2 cards in hand are the same value
             self.second_bet += self.bet
             self.money -= self.bet
             self.second_hand = [list(self.hand[1])]  # Second card goes to hand #2
@@ -210,15 +231,15 @@ class CardPlayer:
             self.hand_value = self.conv_value(self.hand[0][1])
             self.hit_counter = 1
             self.hit_counter2 = 1
-            self.deal_hand1()
-            self.deal_hand2()
-            self.split += 1
-            self.stand2 = False
+            self.deal_hand1()  # new card is dealt to hand 1
+            self.deal_hand2()  # new cards is dealt to hand 2
+            self.split += 1  # split flag is raised
+            self.stand2 = False  # 2nd hand stand flag set to false
         else:
             print ("Can't split unequal cards!")
 
     def double(self):
-        if  not self.stand2 or not self.stand_flag:
+        if not self.stand2 or not self.stand_flag:
             if len(self.hand) == 2 or len(self.second_hand) == 2:
                 self.money -= self.bet
                 self.bet *= 2
@@ -237,9 +258,8 @@ class CardPlayer:
                 else:
                     return
 
-
     def deal_hand1(self):
-        if not self.stand_flag : #regular scenario
+        if not self.stand_flag:  # regular scenario
             drawn_card = list(random.choice(self.deck.items()))
             drawn_card = [drawn_card[0], random.choice(drawn_card[1])]
             self.hand.append(drawn_card)
@@ -275,7 +295,6 @@ class CardPlayer:
         if (self.second_hand_value > 21) and (self.ace_counter2 > 0):
             self.ace_counter2 -= 1
             self.second_hand_value -= 10
-
 
     def show_cards(self):
         imglst = []
@@ -351,8 +370,9 @@ class CardPlayer:
                 start_pos[1] += 20
             if not self.stand_flag:
                 c.create_text(250, 20, fill="black", font="Times 9 bold",
-                          text="{} your cards value is {}\nDealer upside card is {} ".format(self.name, self.hand_value,
-                                                                                             Dealer.hand[1][:]))
+                text="{} your cards value is {}\nDealer upside card is {} ".format(self.name,
+                                                                                   self.hand_value,
+                                                                                   Dealer.hand[1][:]))
                 time.sleep(2)
                 return
             if self.stand_flag:
@@ -445,6 +465,8 @@ def main_game():
             player.player_turn()
         #Bets are over, Dealer drawing!!
         while True:
+            if len(players) == 0:  # no one played this turn
+                break
             if Dealer.hand_value < 17:
                 Dealer.show_cards()
                 Dealer.deal_hand1()
@@ -471,7 +493,7 @@ def main_game():
         button1.pack()
         global play
         play = False
-        time.sleep(10)
+        time.sleep(6)
         if play:
             c.delete(button1)
             win.update()
