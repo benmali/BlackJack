@@ -11,7 +11,7 @@ from PIL import ImageTk, Image
 class GraphicGame(tk.Tk):
     def __init__(self, deck, dealer, gamblers):
         tk.Tk.__init__(self)
-        container = tk.Frame(self)
+        container = tk.Frame(self,width=800, height=800)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -70,24 +70,49 @@ class GraphicGame(tk.Tk):
             time.sleep(2)  # must put sleep here, or graphics disappear,causes "flashing"
 
 
-class MainGameWindow(tk.Frame):
-    def __init__(self, parent, controller, players):
+class MainGameWindow(tk.Frame):  # test
+    def __init__(self, parent, controller, gamblers):
         tk.Frame.__init__(self, parent)
+        player = gamblers[0]
 
-        if players[0].check_active_hand() is None:
-            current_player = players[1]
-        else:
-            current_player = players[0]
-        self.create_bet_canvas(players)
 
-        hit_button = tk.Button(self, text="   Hit   ", fg="green", bg="white", command=current_player.hit)
-        stand_button = tk.Button(self, text="   Stand   ", fg="red", bg="white", command=current_player.stand)
-        split_button = tk.Button(self, text="   Split   ", fg="blue", bg="white", command=current_player.split)
-        double_button = tk.Button(self, text="   Double   ", fg="blue", bg="white", command=current_player.double)
-        hit_button.place(x=640, y=700)
+        hit_button = tk.Button(self, text="   Hit   ", fg="green", bg="white", command=player.hit)
+        stand_button = tk.Button(self, text="   Stand   ", fg="red", bg="white", command=player.stand)
+        split_button = tk.Button(self, text="   Split   ", fg="blue", bg="white", command=player.split)
+        double_button = tk.Button(self, text="   Double   ", fg="blue", bg="white", command=player.double)
+        hit_button.place(x=685, y=700)
         stand_button.place(x=685, y=700)
         split_button.place(x=744, y=700)
         double_button.place(x=796, y=700)
+
+
+
+
+    def create_bet_canvas(self, players):
+        b = tk.Canvas(self, bg="white", height=750, width=1420)
+        b.place(x=60, y=20)
+        y = 20
+        for player in players:
+            b.create_text(70, y, fill="black", font="Times 8 bold",
+                        text="{} your bank is {} ".format(player.name, player.bank))
+            y += 25
+    def canvas(self, players):
+        b = tk.Canvas(self, bg="white", height=750, width=1420)
+        b.place(x=60, y=20)
+
+
+class MainGraphicGame(tk.Frame):  # buttons needs to be aligned neatly
+    def __init__(self, parent, player):
+        tk.Frame.__init__(self, parent)
+        self.player = player
+        hit_button = tk.Button(self, text="   Hit   ", fg="green", bg="white", command=self.player.hit)
+        stand_button = tk.Button(self, text="   Stand   ", fg="red", bg="white", command=self.player.stand)
+        split_button = tk.Button(self, text="   Split   ", fg="blue", bg="white", command=self.player.split)
+        double_button = tk.Button(self, text="   Double   ", fg="blue", bg="white", command=self.player.double)
+        hit_button.grid()
+        stand_button.grid()
+        split_button.grid()
+        double_button.grid()
 
     def create_bet_canvas(self, players):
         b = tk.Canvas(self, bg="white", height=750, width=1420)
@@ -120,7 +145,7 @@ class BetPage(tk.Frame):
                             command=lambda: self.get_input(input, players))
         button3.pack()
 
-        button4 = tk.Button(self, text="Continue to Game",
+        button4 = tk.Button(self, text="Change Page Test",
                             command=lambda: controller.show_frame(MainGameWindow))
         button4.pack()
 
