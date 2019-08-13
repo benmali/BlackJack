@@ -3,6 +3,7 @@ from deck import Deck
 from players import Gambler, Dealer
 import time
 import threading
+from test import MainGraphicGame
 import tkinter as tk
 import os
 from PIL import ImageTk, Image
@@ -14,9 +15,8 @@ class MainGame:
        self.gamblers = gamblers
        self.window = window
 
-
     def start_game(self):
-        print("Main Thread activated")
+        print("Main Game activated")
         deck = Deck()
         while True:
             time.sleep(7)
@@ -28,11 +28,25 @@ class MainGame:
                 for i in range(2):
                     player.hands[0].get_card(deck)
                     print(player.hands[0].cards)
-                for i in range(2):  # dealer gets 2 cards
-                    self.dealer.hand.get_card(deck)
+            for i in range(2):  # dealer gets 2 cards
+                self.dealer.hand.get_card(deck)
+                # end of game initialization
 
-                while not player.should_stop():
+            # starting players' turns
+            # every player gets his own frame, plays his hand
+            frame = None
+            for player in active_players:  # creating buttons for each player
+                if frame is not None:  # if players have played before, destroy their old buttons
+                    frame.destroy()
+                frame = MainGraphicGame(self.window, player)
+                self.window.frames[MainGraphicGame] = frame
+                frame.pack()
+                print("1")
+                while not player.should_stop():  # not working properly
+                    self.window.show_frame(MainGraphicGame)
                     self.window.show_cards(player)
+            frame.destroy()
+            self.conclude(active_players)
 
 
 
@@ -69,7 +83,7 @@ class MainGame:
                             player.bank = hand.tie(player)
                             player.bank += hand.win(player)
                             continue
-
+        print("End of Game!")
 
 deck = Deck()
 active_players = []
